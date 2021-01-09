@@ -59,6 +59,8 @@ public:
 
   void publishTwist(const geometry_msgs::TwistConstPtr& msg);
 
+  void publishZeroTwist();
+
   void updateDiagnostics(const ros::TimerEvent& event);
 
 protected:
@@ -85,6 +87,7 @@ protected:
   ros::Publisher cmd_pub_;
 
   geometry_msgs::Twist last_cmd_;
+  geometry_msgs::Twist zero_cmd;
 
   template<typename T>
   void getTopicHandles(ros::NodeHandle& nh, ros::NodeHandle& nh_priv, const std::string& param_name, std::list<T>& topic_hs);

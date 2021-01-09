@@ -75,6 +75,10 @@ public:
   virtual ~TopicHandle_()
   {
     subscriber_.shutdown();
+    if(mux_ != nullptr){
+      delete mux_;
+      mux_ = nullptr;
+    }
   }
 
   /**

@@ -57,16 +57,23 @@ TwistMux::TwistMux(int window_size)
   velocity_hs_ = boost::make_shared<velocity_topic_container>();
   lock_hs_     = boost::make_shared<lock_topic_container>();
   getTopicHandles(nh, nh_priv, "topics", *velocity_hs_);
-  getTopicHandles(nh, nh_priv, "locks" , *lock_hs_ );
+  //getTopicHandles(nh, nh_priv, "locks" , *lock_hs_ );
 
   /// Publisher for output topic:
   cmd_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel_out", 1);
 
   /// Diagnostics:
-  diagnostics_ = boost::make_shared<diagnostics_type>();
+  diagnostics_ = boost::shared_ptr<diagnostics_type>(new diagnostics_type(this));
   status_      = boost::make_shared<status_type>();
   status_->velocity_hs = velocity_hs_;
   status_->lock_hs     = lock_hs_;
+
+  zero_cmd.linear.x = 0;
+  zero_cmd.linear.y = 0;
+  zero_cmd.linear.z = 0;
+  zero_cmd.angular.x = 0;
+  zero_cmd.angular.y = 0;
+  zero_cmd.angular.z = 0;
 
   diagnostics_timer_ = nh.createTimer(ros::Duration(DIAGNOSTICS_PERIOD), &TwistMux::updateDiagnostics, this);
 }
@@ -83,6 +90,10 @@ void TwistMux::updateDiagnostics(const ros::TimerEvent& event)
 void TwistMux::publishTwist(const geometry_msgs::TwistConstPtr& msg)
 {
   cmd_pub_.publish(*msg);
+}
+
+void TwistMux::publishZeroTwist(){
+  cmd_pub_.publish(zero_cmd);
 }
 
 template<typename T>

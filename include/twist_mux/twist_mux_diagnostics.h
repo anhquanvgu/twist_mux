@@ -39,7 +39,7 @@ class TwistMuxDiagnostics
     static constexpr double MAIN_LOOP_TIME_MIN = 0.2; // [s]
     static constexpr double READING_AGE_MIN    = 3.0; // [s]
 
-    TwistMuxDiagnostics();
+    TwistMuxDiagnostics(TwistMux *mux);
     virtual ~TwistMuxDiagnostics();
 
     void diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
@@ -62,6 +62,7 @@ class TwistMuxDiagnostics
 
     diagnostic_updater::Updater diagnostic_;
     status_type                 status_;
+    TwistMux *mux_;
 };
 
 } // namespace twist_mux
