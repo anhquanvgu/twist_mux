@@ -71,7 +71,7 @@ void TwistMuxDiagnostics::diagnostics(diagnostic_updater::DiagnosticStatusWrappe
   else
     stat.summary(OK, "ok");
 
-  bool all_active = true;
+  bool all_expired = true;
 
   for (const auto& velocity_h : *status_.velocity_hs)
   {
@@ -82,11 +82,11 @@ void TwistMuxDiagnostics::diagnostics(diagnostic_updater::DiagnosticStatusWrappe
               velocity_h.getTimeout(),
               static_cast<int>(velocity_h.getPriority()));
     
-    all_active *= !velocity_h.hasExpired();
-
+    all_expired *= velocity_h.hasExpired();
+    
   }
 
-  if(all_active == false){
+  if(all_expired == true){
     mux_->publishZeroTwist();
   }
 
