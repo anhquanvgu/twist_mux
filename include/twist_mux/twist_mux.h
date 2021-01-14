@@ -69,8 +69,10 @@ protected:
   typedef TwistMuxDiagnosticsStatus status_type;
 
   ros::Timer diagnostics_timer_;
+  ros::Timer expiration_checker_;
 
   static constexpr double DIAGNOSTICS_PERIOD = 1.0;
+  double EXP_CHECKER_PERIOD = 0.0;
 
   /**
    * @brief velocity_hs_ Velocity topics' handles.
@@ -91,6 +93,8 @@ protected:
 
   template<typename T>
   void getTopicHandles(ros::NodeHandle& nh, ros::NodeHandle& nh_priv, const std::string& param_name, std::list<T>& topic_hs);
+
+  void checkTopicExpiration(const ros::TimerEvent &event);
 
   int getLockPriority();
 

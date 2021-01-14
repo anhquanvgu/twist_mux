@@ -26,20 +26,14 @@
 namespace twist_mux
 {
 
-TwistMuxDiagnostics::TwistMuxDiagnostics(TwistMux *mux)
+TwistMuxDiagnostics::TwistMuxDiagnostics()
 {
   diagnostic_.add("Twist mux status", this, &TwistMuxDiagnostics::diagnostics);
   diagnostic_.setHardwareID("none");
-
-  mux_ = mux;
 }
 
 TwistMuxDiagnostics::~TwistMuxDiagnostics()
 {
-  if(mux_ != nullptr){
-    delete mux_;
-    mux_ = nullptr;
-  }
 }
 
 void TwistMuxDiagnostics::update()
@@ -71,8 +65,6 @@ void TwistMuxDiagnostics::diagnostics(diagnostic_updater::DiagnosticStatusWrappe
   else
     stat.summary(OK, "ok");
 
-  bool all_expired = true;
-
   for (const auto& velocity_h : *status_.velocity_hs)
   {
     stat.addf("velocity " + velocity_h.getName(),
@@ -80,14 +72,7 @@ void TwistMuxDiagnostics::diagnostics(diagnostic_updater::DiagnosticStatusWrappe
               (velocity_h.isMasked(status_.priority) ? "masked" : "unmasked"),
               velocity_h.getTopic().c_str(),
               velocity_h.getTimeout(),
-              static_cast<int>(velocity_h.getPriority()));
-    
-    all_expired *= velocity_h.hasExpired();
-    
-  }
-
-  if(all_expired == true){
-    mux_->publishZeroTwist();
+              static_cast<int>(velocity_h.getPriority()));    
   }
 
   for (const auto& lock_h : *status_.lock_hs)

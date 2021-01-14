@@ -63,7 +63,7 @@ TwistMux::TwistMux(int window_size)
   cmd_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel_out", 1);
 
   /// Diagnostics:
-  diagnostics_ = boost::shared_ptr<diagnostics_type>(new diagnostics_type(this));
+  diagnostics_ = boost::make_shared<diagnostics_type>();
   status_      = boost::make_shared<status_type>();
   status_->velocity_hs = velocity_hs_;
   status_->lock_hs     = lock_hs_;
@@ -75,12 +75,31 @@ TwistMux::TwistMux(int window_size)
   zero_cmd.angular.y = 0;
   zero_cmd.angular.z = 0;
 
+  for (const auto& velocity_h : *velocity_hs_){
+    EXP_CHECKER_PERIOD = (velocity_h.getTimeout() > EXP_CHECKER_PERIOD) ?
+                          velocity_h.getTimeout() : EXP_CHECKER_PERIOD;
+  }
+  EXP_CHECKER_PERIOD *= 2;
+  
   diagnostics_timer_ = nh.createTimer(ros::Duration(DIAGNOSTICS_PERIOD), &TwistMux::updateDiagnostics, this);
+  expiration_checker_ = nh.createTimer(ros::Duration(EXP_CHECKER_PERIOD), &TwistMux::checkTopicExpiration, this);
 }
 
 TwistMux::~TwistMux()
 {}
 
+void TwistMux::checkTopicExpiration(const ros::TimerEvent &event){
+  
+  bool all_expired = true;
+
+  for (const auto& velocity_h : *velocity_hs_){
+    all_expired *= velocity_h.hasExpired();
+  }
+
+  if(all_expired == true){
+    publishZeroTwist();
+  }
+}
 void TwistMux::updateDiagnostics(const ros::TimerEvent& event)
 {
   status_->priority = getLockPriority();
